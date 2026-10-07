@@ -16,6 +16,14 @@ machine** (plus root `sysctl` without sudo). Rule of thumb from the cliff I
 measured: keep **≥ ~4.5 GB of headroom** between what the server "needs" and
 what is "available", or performance collapses.
 
+There is a **second axis the probe does not see**: CPU-side memory. A ~53 GB
+model is wired and never swaps — but whatever is left of unified memory must
+hold the running OS itself. Full macOS (even quiet, ~6+ GB of system
+processes) does not fit beside the model and pushes ~5 GB of system pages to
+swap. recoveryOS (~2–3 GB) fits cleanly: zero swap. So with a model this
+size, Recovery buys you a swap-free machine; with a smaller model (say 44 GB
+of weights), a quiet normal boot is fine.
+
 Verified with an MLX-based server ([SUSHI](https://github.com/beamivalice/sushi))
 serving a 176B-parameter MoE quant —
 [beamster/Qwen3.8-Flash-Next-Sushi-3bpw](https://huggingface.co/beamster/Qwen3.8-Flash-Next-Sushi-3bpw)

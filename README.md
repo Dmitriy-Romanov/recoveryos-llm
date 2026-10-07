@@ -1,17 +1,20 @@
 # Run a local LLM in macOS Recovery mode
 
-**Idea:** macOS Recovery is a minimal system without your apps, browser and
-most background services. Boot a 64 GB Mac into Recovery instead of normal
-macOS — and your LLM server gets **~2.3 GB more GPU-wired memory for free**.
+**Idea:** when a big model runs close to the GPU memory ceiling, the margin
+between what it needs and what the GPU has available decides whether it runs
+clean or thrashes. The surprise from measuring this: the thing eating that
+margin is not the OS — it is **your running apps**.
 
-That sounds tiny, but when a big model runs close to the GPU memory ceiling,
-those 2 GB decide whether it runs clean or thrashes. On my machine
-(64 GB M1 Max, macOS 27.0.1, wired limit raised to 59000 MB) the GPU sees
-**55.4 GB available in normal macOS vs 57.6 GB in Recovery**. A model that
-needs ~53 GB sits 2.4 GB from the wall on a normal boot — and 4.7 GB from it
-in Recovery. Rule of thumb from measuring this: keep **≥ ~4.5 GB of headroom**
-between what the server "needs" and what is "available", or performance falls
-off a cliff.
+On my machine (64 GB M1 Max, macOS 27.0.1, wired limit at 59000 MB), probed
+via Metal (`recommendedMaxWorkingSetSize`): normal macOS with a browser + IDE
+running — **55.4 GB** available; the same normal macOS with apps closed —
+**57.6 GB**; Recovery mode — the same **57.6 GB**. A quiet normal boot and
+Recovery expose identical GPU memory: the macOS baseline itself wires almost
+nothing, while a browser-with-tabs + Electron session held ~2.3 GB.
+**Closing your apps is the memory win; Recovery is just a guaranteed-empty
+machine** (plus root `sysctl` without sudo). Rule of thumb from the cliff I
+measured: keep **≥ ~4.5 GB of headroom** between what the server "needs" and
+what is "available", or performance collapses.
 
 Verified with an MLX-based server ([SUSHI](https://github.com/beamivalice/sushi))
 serving a 176B-parameter MoE quant —
